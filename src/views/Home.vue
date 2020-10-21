@@ -1,18 +1,35 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <h3>Welcome!</h3>
+    <p>Enter your room ID below if joining, otherwise hit start meeting!</p>
+    <input type="text" v-model="room">
+    <button @click="join">Join / Start</button>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
-
+<script>
+import { defineComponent, computed, ref } from 'vue';
+import joinRoom from '../utils/joinRoom'
 export default defineComponent({
-  name: 'Home',
-  components: {
-    HelloWorld,
+  setup(props, {}) {
+    const colors = ['purple', 'orange', 'black', 'green', 'blue', 'red', 'yellow'],
+      animals = ['monkey', 'whale', 'bird', 'gorilla', 'turtle', 'dog', 'cat', 'elephant'];
+
+    const color = colors[Math.floor(Math.random() * colors.length)],
+      animal = animals[Math.floor(Math.random() * animals.length)];
+    const room = ref(`${color.substr(0, 1).toUpperCase()}${color.substr(1)} ${animal.substr(0, 1).toUpperCase()}${animal.substr(1)}`);
+
+    function join() {
+      console.log('JOIN')
+      joinRoom(room.value.toLowerCase());
+    }
+
+    return {
+      // data
+      room,
+      // methods
+      join,
+    };
   },
 });
 </script>
