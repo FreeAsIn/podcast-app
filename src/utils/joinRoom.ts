@@ -1,24 +1,31 @@
-import io from 'socket.io-client.js';
+import io from 'socket.io-client';
 import peer  from './peer'
-let socketId
-function joinRoom(room, onConnected) {
+
+let socketId: string;
+
+interface IHandshake {
+    id: string;
+    handshake: string;
+}
+
+function joinRoom(room: string, onConnected: () => void) {
     const socket = io('http://localhost:8082');
     
-    socket.on('connection', (payload) => {
+    socket.on('connection', (payload: unknown) => {
         console.log('Connected socket', { payload });
     })
 
-    socket.on('message', (payload) => {
+    socket.on('message', (payload: unknown ) => {
         console.log('message', { payload });
         // ...
     })
 
-    socket.on(`announce`, (payload) => {
+    socket.on(`announce`, (payload: unknown  ) => {
         console.log('announce',{ payload })
     })
 
-    socket.on(`handshake`, (payload) => {
-        console.log('handshake',{ payload,socketId })
+    socket.on(`handshake`, (payload: IHandshake) => {
+        console.log('handshake',{ payload,socketId,room })
         socketId = payload.id
         if (payload.handshake.search(/fromId/) >= 0){
             peer.ConsumeHandshake(payload.handshake);
@@ -27,7 +34,7 @@ function joinRoom(room, onConnected) {
         }
     })
 
-    socket.on(`joined`, (id) => {
+    socket.on(`joined`, (id: string) => {
         socketId = id
         console.log('Joined',socketId )
         // socket.join(`dm/${id}`)
@@ -39,17 +46,18 @@ function joinRoom(room, onConnected) {
 
     socket.emit('join', room)
 
-    peer.onGeneratedHandshake = (handshake)=>{
+    peer.onGeneratedHandshake = (handshake: string)=>{
         console.log('onGeneratedHandshake', socketId,handshake)
         socket.emit('handshake', {id:socketId,handshake,room})
     }
 
-    peer.peerConnection_onStateChanged = (evt) => {
-        console.log(`peer connection onStateChanged`, evt);
-        console.log('connectionState',evt.target.connectionState)
+    peer.onStateChanged(evt => {
+        console.log(`peer connection onStateChanged`, evt, peer);
+        // console.log('connectionState',evt.target.connectionState)
 
         onConnected();
-    }
+    });
+    
 
 }
 
