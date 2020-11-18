@@ -1,7 +1,7 @@
 import io from 'socket.io-client.js';
 import peer  from './peer'
 let socketId
-function joinRoom(room) {
+function joinRoom(room, onConnected) {
     const socket = io('http://localhost:8082');
     
     socket.on('connection', (payload) => {
@@ -41,13 +41,15 @@ function joinRoom(room) {
 
     peer.onGeneratedHandshake = (handshake)=>{
         console.log('onGeneratedHandshake', socketId,handshake)
-        socket.emit('handshake', {id:socketId,handshake})
+        socket.emit('handshake', {id:socketId,handshake,room})
     }
 
+    peer.peerConnection_onStateChanged = (evt) => {
+        console.log(`peer connection onStateChanged`, evt);
+        console.log('connectionState',evt.target.connectionState)
 
-    peer.onStateChanged  = (evt=>{
-        console.log('onStateChanged',evt)
-    })
+        onConnected();
+    }
 
 }
 

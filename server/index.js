@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
 
     socket.on('handshake', payload => {
         console.log('ON HANDSHAKE from',socket.id)
-        console.log('EMIT HANDSHAKE TO ',payload.id, payload)
+        console.log('EMIT HANDSHAKE TO ',payload.id, payload, payload.room)
         io.to(payload.id).emit('handshake',{id:socket.id,handshake:payload.handshake})
         // io.socke(payload.id).emit('handshake',{id:socket.id,handshake:payload.handshake})
         // console.log(server.clients)
